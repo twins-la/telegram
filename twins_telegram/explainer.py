@@ -156,7 +156,7 @@ EXPLAINER_HTML = """\
         a:hover { color: #006699; text-decoration: underline; }
         ul { list-style: none; padding: 0; margin-bottom: 1rem; }
         ul li { padding: 0.3rem 0; color: #6b7280; }
-        ul li::before { content: "&rarr; "; color: #0088cc; }
+        ul li::before { content: "→ "; color: #0088cc; }
         code {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85em;

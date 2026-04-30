@@ -54,6 +54,23 @@ def test_explainer_page(client):
     assert "twins.la" in body
 
 
+def test_explainer_has_no_html_entities_inside_css_content(client):
+    """CSS content: declarations are CSSOM strings — they do NOT decode HTML
+    entities. Writing `content: "&rarr; "` causes the literal text `&rarr;`
+    to render in the browser. Job 021 fixed one instance in this file; this
+    sweep-style assertion catches the whole class on regression.
+    """
+    import re
+
+    body = client.get("/").get_data(as_text=True)
+    bad = re.findall(r'content:\s*"[^"]*&\w+;[^"]*"', body)
+    assert not bad, (
+        "HTML entity reference appears inside a CSS content: declaration. "
+        "CSS does not decode entities — use a literal Unicode character or "
+        f"a CSS escape (e.g. \\2192). Offending: {bad}"
+    )
+
+
 def test_agent_instructions(client):
     resp = client.get("/_twin/agent-instructions")
     assert resp.status_code == 200
