@@ -75,6 +75,9 @@ def send_message(token):
     chat_id_raw = params.get("chat_id")
     text = params.get("text", "")
 
+    if len(str(text)) > 4096:
+        return bad_request("text exceeds 4096 characters")
+
     if chat_id_raw is None or chat_id_raw == "":
         emit(
             g.storage,
@@ -159,6 +162,7 @@ def get_updates(token):
         limit = int(params.get("limit", 100))
     except (TypeError, ValueError):
         return bad_request("offset and limit must be integers")
+    limit = min(max(limit, 1), 100)  # mirror Telegram's real getUpdates bounds
 
     updates = g.storage.get_pending_updates(g.bot["id"], offset=offset, limit=limit)
     emit(

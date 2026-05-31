@@ -108,8 +108,14 @@ class TwinStorage(ABC):
         *,
         status: Optional[str] = None,
         tenant_id: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
     ) -> list[dict]:
-        """List feedback, optionally filtered by status and/or tenant."""
+        """List feedback, optionally filtered by status and/or tenant.
+
+        ``limit``/``offset`` paginate the result; callers are expected to
+        clamp ``limit`` to a sane upper bound before calling.
+        """
 
     @abstractmethod
     def update_feedback(self, feedback_id: str, updates: dict) -> Optional[dict]:

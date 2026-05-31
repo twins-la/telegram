@@ -405,6 +405,8 @@ class SQLiteStorage(TwinStorage):
         *,
         status: Optional[str] = None,
         tenant_id: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
     ) -> list[dict]:
         conn = self._get_conn()
         try:
@@ -416,7 +418,8 @@ class SQLiteStorage(TwinStorage):
             if tenant_id is not None:
                 sql += " AND tenant_id = ?"
                 params.append(tenant_id)
-            sql += " ORDER BY date_created DESC"
+            sql += " ORDER BY date_created DESC LIMIT ? OFFSET ?"
+            params.extend([limit, offset])
             rows = conn.execute(sql, params).fetchall()
             return [self._row_to_feedback(r) for r in rows]
         finally:

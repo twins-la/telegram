@@ -183,8 +183,8 @@ def create_tenant():
 @twin_plane_bp.route("/logs", methods=["GET"])
 @require_tenant_or_admin
 def list_logs():
-    limit = request.args.get("limit", 100, type=int)
-    offset = request.args.get("offset", 0, type=int)
+    limit = max(1, min(request.args.get("limit", 100, type=int), 1000))
+    offset = max(0, request.args.get("offset", 0, type=int))
     tenant_id = None if g.is_admin else g.tenant_id
     entries = g.storage.list_logs(limit=limit, offset=offset, tenant_id=tenant_id)
     return jsonify({"logs": entries, "limit": limit, "offset": offset})
@@ -291,6 +291,8 @@ def simulate_inbound():
         return jsonify({"error": "'from_user_id' is required"}), 400
     if not text or not isinstance(text, str) or not text.strip():
         return jsonify({"error": "'text' is required"}), 400
+    if len(text) > 4096:
+        return jsonify({"error": "'text' exceeds 4096 characters"}), 400
 
     try:
         bot_id = int(bot_id_raw)
@@ -413,9 +415,13 @@ def submit_feedback():
 @require_tenant_or_admin
 def list_feedback():
     status = request.args.get("status")
+    limit = max(1, min(request.args.get("limit", 100, type=int), 1000))
+    offset = max(0, request.args.get("offset", 0, type=int))
     tenant_id = None if g.is_admin else g.tenant_id
-    items = g.storage.list_feedback(status=status, tenant_id=tenant_id)
-    return jsonify({"feedback": items})
+    items = g.storage.list_feedback(
+        status=status, tenant_id=tenant_id, limit=limit, offset=offset
+    )
+    return jsonify({"feedback": items, "limit": limit, "offset": offset})
 
 
 @twin_plane_bp.route("/feedback/<feedback_id>", methods=["GET"])

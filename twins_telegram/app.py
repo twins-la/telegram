@@ -48,6 +48,9 @@ def create_app(
     is_cloud = bool(config.get("is_cloud", False))
 
     app = Flask(__name__)
+    # Cap request body size so a caller cannot stream arbitrarily large bodies
+    # into memory / storage (Flask returns 413 before the handler runs).
+    app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024  # 1 MB
     app.config["TWIN_STORAGE"] = storage
     app.config["TWIN_TENANTS"] = tenants
     app.config["TWIN_BASE_URL"] = base_url
